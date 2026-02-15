@@ -150,6 +150,25 @@ export default async function TeamDetailPage({
           }
       });
 
+  const { data: currentRace } = await supabase
+    .from('races')
+    .select('id')
+    .order('race_number', { ascending: false })
+    .limit(1)
+    .single()
+
+  const { data: lineup } = await supabase
+    .from('lineups')
+    .select('team_driver_id')
+    .eq('team_id', teamId)
+    .eq('race_id', currentRace?.id)
+    .eq('slot_type', 'active')
+
+  const activeIds = new Set(
+    (lineup ?? []).map(l => l.team_driver_id)
+  )
+
+
   let driverPerformance: any[] = []
 
   if (driverStats) {
@@ -213,7 +232,12 @@ export default async function TeamDetailPage({
           {roster?.map((driver) => (
             <div
               key={driver.id}
-              className="border p-4 bg-white rounded"
+              className={`p-4 rounded-xl shadow border transition
+                ${activeIds.has(driver.id)
+                  ? 'bg-green-50 border-green-400'
+                  : 'bg-white'
+                }
+              `}
             >
               <p className="font-semibold">
                 {driver.first_name}{' '}
