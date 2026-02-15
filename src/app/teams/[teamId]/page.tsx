@@ -7,8 +7,23 @@ export default async function TeamDetailPage({
   params: Promise<{ teamId: string }>
 }) {
   const { teamId } = await params
-
   const supabase = await createSupabaseServerClient()
+
+  type RosterDriver = {
+      id: string,
+      is_on_ir: boolean,
+      first_name: string,
+      last_name: string,
+      car_number: string,
+      team_name: string
+    }
+
+    type DriverStats = {
+      id: string, 
+      driver_id: string,
+      first_name: string,
+      last_name: string
+    }
 
   // Verify logged in
   const {
@@ -48,7 +63,7 @@ export default async function TeamDetailPage({
     .single()
 
   // Get roster
-  const { data: roster } = await supabase
+  const { data: rosterRaw } = await supabase
     .from('team_drivers')
     .select(`
       id,
@@ -62,8 +77,23 @@ export default async function TeamDetailPage({
     `)
     .eq('team_id', teamId)
 
+    const roster: RosterDriver[] = 
+      (rosterRaw ?? []).map((r: any) => {
+        const driver = Array.isArray(r.drivers)
+          ? r.driveres[0] : r.drivers
+
+          return {
+            id: r.id,
+            is_on_ir: r.is_on_ir,
+            first_name: driver?.first_name ?? '',
+            last_name: driver?.last_name ?? '',
+            car_number: driver?.car_number ?? '',
+            team_name: driver?.team_name ?? ''
+          }
+      })
+
   // Get driver performance totals
-  const { data: driverStats } = await supabase
+  const { data: driverStatsRaw } = await supabase
     .from('team_drivers')
     .select(`
     id,
@@ -74,9 +104,23 @@ export default async function TeamDetailPage({
     )
   `)
     .eq('team_id', teamId)
+    
+    const driverStats: DriverStats[] = 
+      (driverStatsRaw ?? []).map((td: any) => {
+        const driver = Array.isArray(td.drivers)
+          ? td.drivers[0]
+          : td.drivers
+
+          return {
+            id: td.id,
+            driver_id: driver?.id,
+            first_name: driver?.first_name ?? '',
+            last_name: driver?.last_name ?? ''
+          }
+      })
 
   // Get race history
-  const { data: raceHistory } = await supabase
+  const { data: raceHistoryRaw } = await supabase
     .from('team_race_points')
     .select(`
       total_points,
@@ -87,6 +131,25 @@ export default async function TeamDetailPage({
     `)
     .eq('team_id', teamId)
 
+    type RaceHistory = {
+      total_points: number
+      race_name: string
+      race_number: number
+    }
+
+    const raceHistory: RaceHistory[] = 
+      (raceHistoryRaw ?? []).map((rh:any) => {
+        const race = Array.isArray(rh.races)
+          ? rh.races[0]
+          : rh.races
+
+          return {
+            total_points: rh.total_points,
+            race_name: race?.name ?? '',
+            race_number: race?.race_number ?? 0
+          }
+      });
+
   let driverPerformance: any[] = []
 
   if (driverStats) {
@@ -94,7 +157,7 @@ export default async function TeamDetailPage({
       const { data: results } = await supabase
         .from('race_results')
         .select('race_points, stage_1_points, stage_2_points')
-        .eq('driver_id', td.drivers.id)
+        .eq('driver_id', td.driver_id)
 
       const totals = results?.reduce(
         (acc, r) => {
@@ -107,7 +170,7 @@ export default async function TeamDetailPage({
       )
 
       driverPerformance.push({
-        name: `${td.drivers.first_name} ${td.drivers.last_name}`,
+        name: `${td.first_name} ${td.last_name}`,
         race_points: totals?.race_points || 0,
         stage_1_points: totals?.stage_1_points || 0,
         stage_2_points: totals?.stage_2_points || 0,
@@ -153,12 +216,12 @@ export default async function TeamDetailPage({
               className="border p-4 bg-white rounded"
             >
               <p className="font-semibold">
-                {driver.drivers.first_name}{' '}
-                {driver.drivers.last_name}
+                {driver.first_name}{' '}
+                {driver.last_name}
               </p>
               <p className="text-sm text-gray-500">
-                #{driver.drivers.car_number} •{' '}
-                {driver.drivers.team_name}
+                #{driver.car_number} •{' '}
+                {driver.team_name}
               </p>
               {driver.is_on_ir && (
                 <p className="text-xs text-red-600">IR</p>
@@ -168,27 +231,30 @@ export default async function TeamDetailPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-hidden">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Race History
         </h2>
 
         <div className="border rounded bg-white">
+          <div className="grid grid-cols-2 p-4 bg-gray-100 text-sm font-semibold uppercase tracking-wide text-gray-600">
+            <div>Race Name</div>
+            <div>Points Earned</div>
+          </div>
           {raceHistory?.map((race, idx) => (
             <div
               key={idx}
               className={`grid grid-cols-2 p-4 ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'
                 }`}
             >
-
-              <div>{race.races?.name}</div>
+              <div>{race.race_name}</div>
               <div>{race.total_points}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="bg-white p-4 rounded-xl shadow-sm border overflow-hidden">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Driver Performance
         </h2>
