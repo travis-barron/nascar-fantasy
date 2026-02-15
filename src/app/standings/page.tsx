@@ -50,7 +50,8 @@ export default async function StandingsPage() {
           <div>Waiver Priority</div>
         </div>
 
-        {standings.map((row) => (
+        {standings.map((row : { id: string; weekly_rank: number | undefined; team_id: string; 
+                        total_points: number | undefined; waiver_priority: number | undefined; teams: { name: any  }[] } ) => (
           <div
             key={row.id}
             className="grid grid-cols-4 border-b p-4"
