@@ -20,21 +20,42 @@ export default async function StandingsPage() {
 
   if (!team) return <div>No team found.</div>
 
-  const { data: standings } = await supabase
-    .from('standings')
-    .select(`
-  id,
-  team_id,
-  total_points,
-  weekly_rank,
-  waiver_priority,
-  teams (
-    name
-  )
-`)
+const { data } = await supabase
+  .from('standings')
+  .select(`
+    id,
+    team_id,
+    total_points,
+    weekly_rank,
+    waiver_priority,
+    teams (
+      name
+    )
+  `)
+  .order('weekly_rank', { ascending: true })
 
-    .eq('league_id', team.league_id)
-    .order('total_points', { ascending: false })
+type Standing = {
+  id: string
+  team_id: string
+  total_points: number
+  weekly_rank: number
+  waiver_priority: number
+  team_name: string
+}
+
+const standings: Standing[] =
+  (data ?? []).map((row: any) => ({
+    id: row.id,
+    team_id: row.team_id,
+    total_points: row.total_points ?? 0,
+    weekly_rank: row.weekly_rank ?? 0,
+    waiver_priority: row.waiver_priority ?? 0,
+    team_name: Array.isArray(row.teams)
+      ? row.teams[0]?.name ?? 'Unknown'
+      : row.teams?.name ?? 'Unknown',
+  }))
+
+
 
   if (!standings) return <div>No standings found.</div>
 
@@ -50,8 +71,7 @@ export default async function StandingsPage() {
           <div>Waiver Priority</div>
         </div>
 
-        {standings.map((row : { id: string; weekly_rank: number | undefined; team_id: string; 
-                        total_points: number | undefined; waiver_priority: number | undefined; teams: { name: any  }[] } ) => (
+        {standings?.map((row) => (
           <div
             key={row.id}
             className="grid grid-cols-4 border-b p-4"
@@ -62,7 +82,7 @@ export default async function StandingsPage() {
                 href={`/teams/${row.team_id}`}
                 className="text-blue-600 hover:underline"
               >
-                {row.teams?.name}
+                {row.team_name}
               </Link>
             </div>
             <div>{row.total_points}</div>
