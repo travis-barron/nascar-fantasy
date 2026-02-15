@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 export default function LineupManager({
@@ -46,7 +46,7 @@ export default function LineupManager({
       }
 
     const activeCount = drivers.filter(
-      (d) => d.slot_type === 'active'
+      (d: { slot_type: string }) => d.slot_type === 'active'
     ).length
 
     if (activeCount !== 3) {
@@ -62,7 +62,7 @@ export default function LineupManager({
       .eq('team_id', team.id)
 
     // Insert new lineup
-    const inserts = drivers.map((d) => ({
+    const inserts = drivers.map((d : {id : string, slot_type: string}) => ({
       race_id: race.id,
       team_id: team.id,
       team_driver_id: d.id,
@@ -85,7 +85,7 @@ export default function LineupManager({
       </h1>
 
       <div className="space-y-3">
-        {drivers.map((driver) => (
+        {drivers.map((driver: { id: string; drivers: { first_name: string; last_name: string; car_number: string;}, slot_type: string }) => (
           <div
             key={driver.id}
             className="border p-4 rounded flex justify-between items-center bg-white"
