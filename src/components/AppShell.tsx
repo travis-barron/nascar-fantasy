@@ -62,6 +62,7 @@ export default function AppShell({
           {navItem('/', 'Dashboard')}
           {navItem('/my-team', 'My Team')}
           {navItem('/standings', 'Standings')}
+          {navItem('/waivers', 'Waivers')}
           {navItem('/commissioner', 'Commissioner')}
         </nav>
 
