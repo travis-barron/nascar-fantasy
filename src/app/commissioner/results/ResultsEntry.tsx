@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { finalizeRace } from '@/app/actions/finalizeRace'
 
@@ -34,8 +34,8 @@ export default function ResultsEntry({
         field: string,
         value: string
     ) => {
-        setResults((prev) =>
-            prev.map((r) =>
+        setResults((prev: { driver_id: string }[]) =>
+            prev.map((r: { driver_id: string }) =>
                 r.driver_id === driverId
                     ? { ...r, [field]: Number(value) }
                     : r
@@ -46,7 +46,7 @@ export default function ResultsEntry({
     const saveResults = async () => {
         // Filter only drivers with a finish position entered
         const validResults = results.filter(
-            (r) =>
+            (r: { finish_position: string | null; race_points: null }) =>
                 r.finish_position !== '' &&
                 r.finish_position !== null &&
                 r.race_points !== null
@@ -62,7 +62,7 @@ export default function ResultsEntry({
             .delete()
             .eq('race_id', race.id)
 
-        const inserts = validResults.map((r) => ({
+        const inserts = validResults.map((r: { driver_id: any; finish_position: any; stage_1_points: any; stage_2_points: any; race_points: any }) => ({
             race_id: race.id,
             driver_id: r.driver_id,
             finish_position: r.finish_position,
@@ -91,7 +91,7 @@ export default function ResultsEntry({
             </h1>
 
             <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                {results.map((r) => (
+                {results.map((r: { driver_id: string; name: string; finish_position: number | undefined; stage_1_points: number | undefined; stage_2_points: number | undefined; race_points: number | undefined }) => (
                     <div
                         key={r.driver_id}
                         className="grid grid-cols-5 gap-2 border p-2 bg-white"
