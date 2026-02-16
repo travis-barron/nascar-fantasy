@@ -22,7 +22,7 @@ export default async function Dashboard() {
   const { data: race } = await supabase
     .from('races')
     .select('*')
-    .order('race_date', { ascending: true })
+    .order('race_date', { ascending: false })
     .limit(1)
     .single()
 

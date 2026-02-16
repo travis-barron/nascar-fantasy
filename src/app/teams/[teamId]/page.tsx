@@ -124,6 +124,7 @@ export default async function TeamDetailPage({
     .from('team_race_points')
     .select(`
       total_points,
+      rank,
       races (
         name,
         race_number
@@ -135,6 +136,7 @@ export default async function TeamDetailPage({
       total_points: number
       race_name: string
       race_number: number
+      rank: number
     }
 
     const raceHistory: RaceHistory[] = 
@@ -146,7 +148,8 @@ export default async function TeamDetailPage({
           return {
             total_points: rh.total_points,
             race_name: race?.name ?? '',
-            race_number: race?.race_number ?? 0
+            race_number: race?.race_number ?? 0,
+            rank: rh.rank
           }
       });
 
@@ -261,18 +264,20 @@ export default async function TeamDetailPage({
         </h2>
 
         <div className="border rounded bg-white">
-          <div className="grid grid-cols-2 p-4 bg-gray-100 text-sm font-semibold uppercase tracking-wide text-gray-600">
+          <div className="grid grid-cols-3 p-4 bg-gray-100 text-sm font-semibold uppercase tracking-wide text-gray-600">
             <div>Race Name</div>
             <div>Points Earned</div>
+            <div>Rank</div>
           </div>
           {raceHistory?.map((race, idx) => (
             <div
               key={idx}
-              className={`grid grid-cols-2 p-4 ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+              className={`grid grid-cols-3 p-4 ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'
                 }`}
             >
               <div>{race.race_name}</div>
               <div>{race.total_points}</div>
+              <div>{race.rank} {race.rank == 1 ? <span className="text-yellow-500 text-lg">🏆</span> : ''}</div>
             </div>
           ))}
         </div>

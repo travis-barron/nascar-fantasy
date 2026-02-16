@@ -74,7 +74,9 @@ const standings: Standing[] =
         {standings?.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-4 border-b p-4"
+            className={`grid grid-cols-4 border-b p-4
+              ${row.weekly_rank % 2 == 1 ? 'bg-gray-100' : 'bg-white'} 
+              `}
           >
             <div>{row.weekly_rank}</div>
             <div>
