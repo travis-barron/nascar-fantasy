@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import LineupManager from './LineupManager'
+import EditableTeamName from '@/components/EditableTeamName'
 
 export default async function MyTeamPage() {
   const supabase = await createSupabaseServerClient()
@@ -50,12 +51,21 @@ export default async function MyTeamPage() {
     .eq('team_id', team.id)
 
   return (
-    <LineupManager
-      team={team}
-      roster={roster || []}
-      race={race}
-      existingLineup={existingLineup || []}
-      isLocked={isLocked}
-    />
+    <div>
+      <EditableTeamName
+        teamId={team.id}
+        initialName={team.name}
+      />
+      <br/> <br/>
+
+      <LineupManager
+        team={team}
+        roster={roster || []}
+        race={race}
+        existingLineup={existingLineup || []}
+        isLocked={isLocked}
+      />
+
+    </div>
   )
 }

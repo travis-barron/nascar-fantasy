@@ -29,7 +29,10 @@ const { data } = await supabase
     weekly_rank,
     waiver_priority,
     teams (
-      name
+      name,
+      profiles (
+        display_name
+      )
     )
   `)
   .order('weekly_rank', { ascending: true })
@@ -41,6 +44,7 @@ type Standing = {
   weekly_rank: number
   waiver_priority: number
   team_name: string
+  owner_name: string
 }
 
 const standings: Standing[] =
@@ -53,6 +57,9 @@ const standings: Standing[] =
     team_name: Array.isArray(row.teams)
       ? row.teams[0]?.name ?? 'Unknown'
       : row.teams?.name ?? 'Unknown',
+    owner_name: Array.isArray(row.teams?.profiles)
+      ? row.teams?.profiles[0]?.display_name
+      : row.teams?.profiles?.display_name
   }))
 
 
@@ -84,8 +91,9 @@ const standings: Standing[] =
                 href={`/teams/${row.team_id}`}
                 className="text-blue-600 hover:underline"
               >
-                {row.team_name}
+                {row.team_name} 
               </Link>
+              &nbsp;({row.owner_name})
             </div>
             <div>{row.total_points}</div>
             <div>{row.waiver_priority}</div>
