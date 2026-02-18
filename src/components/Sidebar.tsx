@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default function Sidebar() {
   return (
-    <div className="w-64 bg-white border-r min-h-screen p-6 space-y-6 text-gray-600">
+    <div className="w-64 bg-white border-r min-h-screen fixed p-6 space-y-6 text-gray-600">
       <div className="text-xl font-bold">
         NASCAR Fantasy
       </div>

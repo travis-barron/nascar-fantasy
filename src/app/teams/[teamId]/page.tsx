@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import TeamDetailClient from '@/components/TeamDetailClient'
 
 export default async function TeamDetailPage({
   params,
@@ -9,13 +10,16 @@ export default async function TeamDetailPage({
   const { teamId } = await params
   const supabase = await createSupabaseServerClient()
 
+
   type RosterDriver = {
       id: string,
       is_on_ir: boolean,
       first_name: string,
       last_name: string,
       car_number: string,
-      team_name: string
+      team_name: string,
+      driver_id: string,
+      is_active: boolean
     }
 
     type DriverStats = {
@@ -55,6 +59,25 @@ export default async function TeamDetailPage({
     return <div>Unauthorized</div>
   }
 
+  // Get active roster
+  const { data: currentRace } = await supabase
+    .from('races')
+    .select('id')
+    .order('race_number', { ascending: false })
+    .limit(1)
+    .single()
+
+  const { data: lineup } = await supabase
+    .from('lineups')
+    .select('team_driver_id')
+    .eq('team_id', teamId)
+    .eq('race_id', currentRace?.id)
+    .eq('slot_type', 'active')
+
+  const activeIds = new Set(
+    (lineup ?? []).map(l => l.team_driver_id)
+  )
+
   // Get standings info
   const { data: standing } = await supabase
     .from('standings')
@@ -72,11 +95,13 @@ export default async function TeamDetailPage({
         first_name,
         last_name,
         car_number,
-        team_name
+        team_name,
+        id
       )
     `)
     .eq('team_id', teamId)
 
+    console.log(activeIds);
     const roster: RosterDriver[] = 
       (rosterRaw ?? []).map((r: any) => {
         const driver = Array.isArray(r.drivers)
@@ -88,7 +113,9 @@ export default async function TeamDetailPage({
             first_name: driver?.first_name ?? '',
             last_name: driver?.last_name ?? '',
             car_number: driver?.car_number ?? '',
-            team_name: driver?.team_name ?? ''
+            team_name: driver?.team_name ?? '',
+            driver_id: driver?.id ?? '',
+            is_active: activeIds.has(r.id)
           }
       })
 
@@ -153,25 +180,6 @@ export default async function TeamDetailPage({
           }
       });
 
-  const { data: currentRace } = await supabase
-    .from('races')
-    .select('id')
-    .order('race_number', { ascending: false })
-    .limit(1)
-    .single()
-
-  const { data: lineup } = await supabase
-    .from('lineups')
-    .select('team_driver_id')
-    .eq('team_id', teamId)
-    .eq('race_id', currentRace?.id)
-    .eq('slot_type', 'active')
-
-  const activeIds = new Set(
-    (lineup ?? []).map(l => l.team_driver_id)
-  )
-
-
   let driverPerformance: any[] = []
 
   if (driverStats) {
@@ -231,31 +239,15 @@ export default async function TeamDetailPage({
 
       <div className="bg-white p-4 rounded-xl shadow-sm border hover:shadow-md transition">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Roster</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {roster?.map((driver) => (
-            <div
-              key={driver.id}
-              className={`p-4 rounded-xl shadow border transition
-                ${activeIds.has(driver.id)
-                  ? 'bg-green-50 border-green-400'
-                  : 'bg-white'
-                }
-              `}
-            >
-              <p className="font-semibold">
-                {driver.first_name}{' '}
-                {driver.last_name}
-              </p>
-              <p className="text-sm text-gray-500">
-                #{driver.car_number} •{' '}
-                {driver.team_name}
-              </p>
-              {driver.is_on_ir && (
-                <p className="text-xs text-red-600">IR</p>
-              )}
-            </div>
-          ))}
-        </div>
+        <TeamDetailClient drivers={roster.map(function(ds) {
+        return {
+          id : ds.driver_id,
+          first_name: ds.first_name,
+          last_name: ds.last_name,
+          team_name: ds.team_name,
+          car_number: ds.car_number,
+          is_active: ds.is_active
+      }})} />
       </div>
 
       <div className="bg-white p-4 rounded-xl shadow-sm border overflow-hidden">

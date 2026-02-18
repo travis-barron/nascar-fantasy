@@ -28,7 +28,7 @@ export default function RootLayout({
               <Topbar />
             </div>
 
-            <main className="flex-1 bg-gray-100 p-4 md:p-8 text-gray-600">
+            <main className="flex-1 bg-gray-100 p-4 md:p-8 md:ml-64 text-gray-600">
               {children}
             </main>
 
