@@ -1,8 +1,23 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 export default function Sidebar() {
+  const supabase = createSupabaseBrowserClient()
+
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    console.log('Logout clicked')
+    const {error} = await supabase.auth.signOut()
+
+    console.log('Sign out result:', error)
+    router.refresh()
+  }
+
   return (
     <div className="w-64 bg-white border-r min-h-screen fixed p-6 space-y-6 text-gray-600">
       <div className="text-xl font-bold">
@@ -16,6 +31,13 @@ export default function Sidebar() {
         <Link href="/waivers">Waivers</Link>
         <Link href="/commissioner">Commissioner</Link>
       </nav>
+
+      <button
+        onClick={handleLogout}
+        className="mt-8 text-red-600 hover:underline text-left"
+      >
+        Logout
+      </button>
     </div>
   )
 }

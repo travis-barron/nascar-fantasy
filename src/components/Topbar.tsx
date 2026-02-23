@@ -2,9 +2,22 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 export default function TopBar() {
   const [open, setOpen] = useState(false)
+    const supabase = createSupabaseBrowserClient()
+  
+    const router = useRouter()
+  
+    const handleLogout = async () => {
+      console.log('Logout clicked')
+      const {error} = await supabase.auth.signOut()
+  
+      console.log('Sign out result:', error)
+      router.refresh()
+    }
 
   return (
     <>
@@ -55,6 +68,7 @@ export default function TopBar() {
               Waivers
             </Link>
             <Link href="/commissioner" onClick={() => setOpen(false)}>Commissioner</Link>
+            <Link href="#" onClick={handleLogout} className="mt-8 text-red-600">Logout</Link>
           </nav>
         </div>
       </div>
