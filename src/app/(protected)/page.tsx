@@ -1,81 +1,127 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
+import LocalTime from '@/components/LocalTime'
+import SeasonTopTen from '@/components/SeasonTopTen'
 
-export default async function Dashboard() {
+export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return null
+  if (!user) {
+    redirect('/login')
+  }
 
-  // Get team
-  const { data: team } = await supabase
-    .from('teams')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!team) return <div>No team found.</div>
-
-  // Get next race
-  const { data: race } = await supabase
+  // 🔜 Next race
+  const { data: nextRace } = await supabase
     .from('races')
     .select('*')
-    .order('race_date', { ascending: false })
+    .gte('lineup_lock_time', new Date().toISOString())
+    .order('lineup_lock_time', { ascending: true })
     .limit(1)
     .single()
 
-  if (!race) return <div>No races scheduled.</div>
-
-  const now = new Date()
-  const lockTime = new Date(race.lineup_lock_time)
-  const isLocked = now >= lockTime
-
-  // Get lineup for this race
-  const { data: lineup } = await supabase
-    .from('lineups')
+  // 🏁 Most recent completed race
+  const { data: lastRace } = await supabase
+    .from('races')
     .select('*')
-    .eq('race_id', race.id)
-    .eq('team_id', team.id)
+    .lt('lineup_lock_time', new Date().toISOString())
+    .order('lineup_lock_time', { ascending: false })
+    .limit(1)
+    .single()
 
-  const activeCount =
-    lineup?.filter((l) => l.slot_type === 'active').length || 0
+  let topFinishers: any[] = []
 
-  let statusLabel = ''
-  let statusColor = ''
+  if (lastRace) {
+    const { data: results } = await supabase
+      .from('race_results')
+      .select(`
+        race_points,
+        stage_1_points,
+        stage_2_points,
+        drivers (
+          first_name,
+          last_name
+        )
+      `)
+      .eq('race_id', lastRace.id)
+      .order('race_points', { ascending: false })
+      .limit(10)
 
-  if (isLocked && activeCount === 3) {
-    statusLabel = 'Locked — Lineup Set'
-    statusColor = 'text-green-600'
-  } else if (isLocked && activeCount !== 3) {
-    statusLabel = 'Locked — No Valid Lineup'
-    statusColor = 'text-red-600'
-  } else if (!isLocked && activeCount === 3) {
-    statusLabel = 'Lineup Set'
-    statusColor = 'text-green-600'
-  } else {
-    statusLabel = 'Lineup Incomplete'
-    statusColor = 'text-yellow-600'
+    topFinishers = results ?? []
   }
 
-  const raceTime = new Date(race.race_date)
-
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Next Race</h1>
+    <div className="space-y-10">
 
-      <div className="border text-slate-600 rounded-lg p-6 bg-white shadow-sm space-y-3">
-        <h2 className="text-xl font-semibold">{race.name}</h2>
-        <p>{race.track_name}</p>
+      {/* 🔜 NEXT RACE */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Next Race</h2>
 
-        <p>Race Date: {raceTime.toLocaleString()}</p>
-        <p>Lineup Lock: {lockTime.toLocaleString()}</p>
+        {nextRace ? (
+          <div className="border rounded p-4">
+            <div className="font-semibold text-lg">
+              {nextRace.name}
+            </div>
+            <div className="text-sm text-gray-600">
+              {nextRace.track_name}
+            </div>
+            <div className="text-sm mt-2">
+              Lineup Lock: <LocalTime timestamp={nextRace.lineup_lock_time} />
+            </div>
+          </div>
+        ) : (
+          <div>No upcoming races scheduled.</div>
+        )}
+      </section>
 
-        <div className={`font-semibold ${statusColor}`}>
-          Status: {statusLabel}
-        </div>
-      </div>
+      {/* Season Top 10 */}
+      <section>
+        <Suspense fallback={<div>Loading season leaders...</div>}>
+          <SeasonTopTen />
+        </Suspense>
+      </section>
+
+      {/* 🏁 LAST RACE RESULTS */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Last Race Top 10 Performers</h2>
+
+        {lastRace ? (
+          <div className="border rounded overflow-hidden">
+            <div className="bg-gray-100 p-3 font-semibold">
+              {lastRace.name}
+            </div>
+
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-2">Pos</th>
+                  <th className="p-2">Driver</th>
+                  <th className="p-2">Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topFinishers.map((result, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="p-2 font-semibold">{index + 1}</td>
+                    <td className="p-2">
+                      {result.drivers?.first_name} {result.drivers?.last_name}
+                    </td>
+                    <td className="p-2">
+                      {result.race_points + result.stage_1_points + result.stage_2_points}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div>No completed races yet.</div>
+        )}
+      </section>
     </div>
   )
 }

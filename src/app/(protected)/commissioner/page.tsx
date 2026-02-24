@@ -82,6 +82,18 @@ export default async function CommissionerHome() {
           </p>
         </Link>
 
+        <Link
+          href="/commissioner/add-race"
+          className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition border"
+        >
+          <h2 className="text-lg font-semibold mb-2">
+            Add New Race
+          </h2>
+          <p className="text-sm text-gray-600">
+            Add a race to the current season.
+          </p>
+        </Link>
+
       </div>
     </div>
   )
