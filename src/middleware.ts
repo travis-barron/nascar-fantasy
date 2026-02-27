@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
 
   // 🔁 Logged in but trying to access login page
   if (session && isPublicRoute) {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
   return res

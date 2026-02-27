@@ -1,6 +1,8 @@
+// src/app/(protected)/waivers/page.tsx
+
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import WaiverForm from './WaiverForm'
 import { redirect } from 'next/navigation'
+import WaiverClient from '@/components/waivers/WaiverClient'
 
 export default async function WaiversPage() {
   const supabase = await createSupabaseServerClient()
@@ -11,58 +13,78 @@ export default async function WaiversPage() {
 
   if (!user) redirect('/login')
 
-  // Get team
+  // Get user's team
   const { data: team } = await supabase
     .from('teams')
-    .select('*')
+    .select('id')
     .eq('user_id', user.id)
     .single()
 
-  if (!team) return <div>No team found.</div>
+  if (!team) redirect('/')
 
-  // Check for existing pending claim
-  const { data: existingClaim } = await supabase
-    .from('waiver_claims')
-    .select('*')
-    .eq('team_id', team.id)
-    .eq('status', 'pending')
-    .single()
-
-  // Get roster
-  const { data: roster } = await supabase
+  // Get roster driver IDs
+  const { data: rosterRows } = await supabase
     .from('team_drivers')
-    .select(`
-      id,
-      drivers (
-        id,
-        first_name,
-        last_name
-      )
-    `)
+    .select('driver_id')
     .eq('team_id', team.id)
 
-  // Get available drivers (not on any team)
+  const rosterIds = rosterRows?.map(r => r.driver_id) ?? []
+
+  // Get all drivers
   const { data: allDrivers } = await supabase
     .from('drivers')
-    .select('*')
-    .order("first_name")
+    .select('id, first_name, last_name')
+    .order('last_name', {ascending: true})
 
-  const { data: rosteredDrivers } = await supabase
+  const allDriverIds = allDrivers?.map(d => d.id) ?? []
+
+  // Free agents = drivers not in team_drivers
+  const { data: allRostered } = await supabase
     .from('team_drivers')
     .select('driver_id')
 
-  const rosteredIds = rosteredDrivers?.map(r => r.driver_id) || []
+  const rosteredIds = new Set(allRostered?.map(r => r.driver_id))
 
-  const availableDrivers = allDrivers?.filter(
-    d => !rosteredIds.includes(d.id)
-  )
+  const freeAgents = allDrivers?.filter(d => !rosteredIds.has(d.id)) ?? []
+
+  // Get current season
+  const { data: season } = await supabase
+    .from('seasons')
+    .select('id')
+    .order('year', { ascending: false })
+    .limit(1)
+    .single()
+
+  // Get all season race results once
+  const { data: results } = await supabase
+    .from('race_results')
+    .select(`
+      driver_id,
+      race_points,
+      stage_1_points,
+      stage_2_points,
+      races!inner(season_id)
+    `)
+    .eq('races.season_id', season?.id)
+
+  // Build totals map
+  const totals: Record<string, number> = {}
+
+  for (const r of results ?? []) {
+    const total =
+      (r.race_points ?? 0) +
+      (r.stage_1_points ?? 0) +
+      (r.stage_2_points ?? 0)
+
+    totals[r.driver_id] = (totals[r.driver_id] ?? 0) + total
+  }
 
   return (
-    <WaiverForm
-      team={team}
-      roster={roster || []}
-      availableDrivers={availableDrivers || []}
-      existingClaim={existingClaim}
+    <WaiverClient
+      roster={allDrivers?.filter(d => rosterIds.includes(d.id)) ?? []}
+      freeAgents={freeAgents ?? []}
+      totals={totals ?? {}}
+      teamId={team.id}
     />
   )
 }
