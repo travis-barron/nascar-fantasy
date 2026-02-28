@@ -101,7 +101,6 @@ export default async function TeamDetailPage({
     `)
     .eq('team_id', teamId)
 
-    console.log(activeIds);
     const roster: RosterDriver[] = 
       (rosterRaw ?? []).map((r: any) => {
         const driver = Array.isArray(r.drivers)

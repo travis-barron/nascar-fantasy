@@ -29,6 +29,7 @@ export default function Sidebar() {
         <Link href="/standings">Standings</Link>
         <Link href="/my-team">My Team</Link>
         <Link href="/waivers">Waivers</Link>
+        <Link href="/trades">Trade Hub</Link>
         <Link href="/commissioner">Commissioner</Link>
       </nav>
 

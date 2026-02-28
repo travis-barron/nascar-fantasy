@@ -67,6 +67,9 @@ export default function TopBar() {
             <Link href="/waivers" onClick={() => setOpen(false)}>
               Waivers
             </Link>
+            <Link href="/trades" onClick={() => setOpen(false)}>
+              Trade Hub
+            </Link>
             <Link href="/commissioner" onClick={() => setOpen(false)}>Commissioner</Link>
             <Link href="#" onClick={handleLogout} className="mt-8 text-red-600">Logout</Link>
           </nav>
