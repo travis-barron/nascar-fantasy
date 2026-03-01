@@ -64,6 +64,27 @@ export async function proposeTradeAction(
     proposing_driver_id: offerDriverId,
     receiving_driver_id: requestDriverId,
   })
+
+  // Get receiving team owner
+  const { data: receivingTeam } = await supabase
+    .from('teams')
+    .select('owner_id')
+    .eq('id', receivingTeamId)
+    .single()
+
+  if (receivingTeam?.owner_id) {
+    await supabase.from('notifications').insert({
+      user_id: receivingTeam.owner_id,
+      type: 'trade_received',
+      message: 'You have received a trade offer.',
+      link: '/trades',
+    })
+  }
+
+  await supabase.from('notifications').insert({
+  scope: 'league',
+  message: `New trade proposed between teams.`,
+})
 }
 
 export async function respondToTradeAction(

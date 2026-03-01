@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import NotificationBell from '@/components/NotificationBell'
 
 export default function Sidebar() {
   const supabase = createSupabaseBrowserClient()

@@ -104,7 +104,7 @@ export default async function TeamDetailPage({
     const roster: RosterDriver[] = 
       (rosterRaw ?? []).map((r: any) => {
         const driver = Array.isArray(r.drivers)
-          ? r.driveres[0] : r.drivers
+          ? r.drivers[0] : r.drivers
 
           return {
             id: r.id,

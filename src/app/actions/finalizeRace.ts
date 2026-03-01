@@ -119,5 +119,10 @@ export async function finalizeRace(raceId: string) {
     .update({ is_finalized: true })
     .eq('id', raceId)
 
+  await supabase.from('notifications').insert({
+    scope: 'league',
+    message: `Race results have been entered.`,
+  })
+
   return { success: true }
 }

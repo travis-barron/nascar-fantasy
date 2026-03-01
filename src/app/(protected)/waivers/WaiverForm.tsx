@@ -35,7 +35,7 @@ export default function WaiverForm({
         league_id: team.league_id,
         team_id: team.id,
         add_driver_id: addDriver,
-        drop_team_driver_id: dropDriver,
+        drop_driver_id: dropDriver,
       })
 
     if (error) {

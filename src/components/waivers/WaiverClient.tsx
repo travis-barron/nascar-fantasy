@@ -15,6 +15,7 @@ type Props = {
     freeAgents: Driver[]
     totals: Record<string, number>
     teamId: string
+    leagueId: string
 }
 
 export default function WaiverClient({
@@ -22,6 +23,7 @@ export default function WaiverClient({
     freeAgents,
     totals,
     teamId,
+    leagueId
 }: Props) {
     const supabase = createSupabaseBrowserClient()
     const router = useRouter()
@@ -33,6 +35,7 @@ export default function WaiverClient({
         if (!dropId || !addId) return
 
         await supabase.from('waiver_claims').insert({
+            league_id: leagueId,
             team_id: teamId,
             drop_driver_id: dropId,
             add_driver_id: addId,

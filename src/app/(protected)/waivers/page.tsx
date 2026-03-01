@@ -16,7 +16,7 @@ export default async function WaiversPage() {
   // Get user's team
   const { data: team } = await supabase
     .from('teams')
-    .select('id')
+    .select('id, league_id')
     .eq('user_id', user.id)
     .single()
 
@@ -25,7 +25,7 @@ export default async function WaiversPage() {
   // Get roster driver IDs
   const { data: rosterRows } = await supabase
     .from('team_drivers')
-    .select('driver_id')
+    .select('driver_id, id')
     .eq('team_id', team.id)
 
   const rosterIds = rosterRows?.map(r => r.driver_id) ?? []
@@ -85,6 +85,7 @@ export default async function WaiversPage() {
       freeAgents={freeAgents ?? []}
       totals={totals ?? {}}
       teamId={team.id}
+      leagueId={team.league_id}
     />
   )
 }
