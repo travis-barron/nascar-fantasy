@@ -72,7 +72,7 @@ export default async function SeasonTopTen() {
                 Season Top 10 Performers
             </h2>
 
-            <div className="border rounded overflow-hidden">
+            <div className="bg-white border rounded overflow-hidden">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="border-b">

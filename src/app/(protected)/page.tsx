@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import LocalTime from '@/components/LocalTime'
 import SeasonTopTen from '@/components/SeasonTopTen'
+import UpcomingRace from '@/components/UpcomingRace'
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -19,8 +20,7 @@ export default async function DashboardPage() {
   const { data: nextRace } = await supabase
     .from('races')
     .select('*')
-    .gte('lineup_lock_time', new Date().toISOString())
-    .order('lineup_lock_time', { ascending: true })
+    .order('lineup_lock_time', { ascending: false })
     .limit(1)
     .single()
 
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   const { data: lastRace } = await supabase
     .from('races')
     .select('*')
-    .lt('lineup_lock_time', new Date().toISOString())
+    .eq('is_finalized', true)
     .order('lineup_lock_time', { ascending: false })
     .limit(1)
     .single()
@@ -59,23 +59,9 @@ export default async function DashboardPage() {
 
       {/* 🔜 NEXT RACE */}
       <section>
-        <h2 className="text-2xl font-bold mb-4">Next Race</h2>
-
-        {nextRace ? (
-          <div className="border rounded p-4">
-            <div className="font-semibold text-lg">
-              {nextRace.name}
-            </div>
-            <div className="text-sm text-gray-600">
-              {nextRace.track_name}
-            </div>
-            <div className="text-sm mt-2">
-              Lineup Lock: <LocalTime timestamp={nextRace.lineup_lock_time} />
-            </div>
-          </div>
-        ) : (
-          <div>No upcoming races scheduled.</div>
-        )}
+        <UpcomingRace 
+          race={nextRace}
+        />
       </section>
 
       {/* Season Top 10 */}
@@ -90,9 +76,9 @@ export default async function DashboardPage() {
         <h2 className="text-2xl font-bold mb-4">Last Race Top 10 Performers</h2>
 
         {lastRace ? (
-          <div className="border rounded overflow-hidden">
+          <div className=" bg-white border rounded overflow-hidden">
             <div className="bg-gray-100 p-3 font-semibold">
-              {lastRace.name}
+              {lastRace.name} | {lastRace.track_name}
             </div>
 
             <table className="w-full text-left">
@@ -110,7 +96,7 @@ export default async function DashboardPage() {
                     <td className="p-2">
                       {result.drivers?.first_name} {result.drivers?.last_name}
                     </td>
-                    <td className="p-2">
+                    <td className="p-2 font-semibold">
                       {result.race_points + result.stage_1_points + result.stage_2_points}
                     </td>
                   </tr>

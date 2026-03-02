@@ -2,6 +2,7 @@
 
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import DriverHistoryModal from '@/components/DriverHistoryModal'
 
 export default function LineupManager({
   team,
@@ -9,8 +10,9 @@ export default function LineupManager({
   race,
   existingLineup,
   isLocked,
-}: any)
- {
+}: any) {
+  const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
+  const [selectedDriverName, setSelectedDriverName] = useState<string | null>(null)
   const supabase = createSupabaseBrowserClient()
 
   const initialState = roster.map((driver: any) => {
@@ -26,24 +28,24 @@ export default function LineupManager({
 
   const [drivers, setDrivers] = useState(initialState)
 
-    const toggleActive = (id: string) => {
-        if (isLocked) return
+  const toggleActive = (id: string) => {
+    if (isLocked) return
 
-        setDrivers((prev: any[]) =>
-            prev.map((d) =>
-                d.id === id
-                    ? { ...d, slot_type: d.slot_type === 'active' ? 'bench' : 'active' }
-                    : d
-            )
-        )
-    }
+    setDrivers((prev: any[]) =>
+      prev.map((d) =>
+        d.id === id
+          ? { ...d, slot_type: d.slot_type === 'active' ? 'bench' : 'active' }
+          : d
+      )
+    )
+  }
 
 
   const saveLineup = async () => {
-      if (isLocked) {
-          alert('Lineup is locked.')
-          return
-      }
+    if (isLocked) {
+      alert('Lineup is locked.')
+      return
+    }
 
     const activeCount = drivers.filter(
       (d: { slot_type: string }) => d.slot_type === 'active'
@@ -62,11 +64,12 @@ export default function LineupManager({
       .eq('team_id', team.id)
 
     // Insert new lineup
-    const inserts = drivers.map((d : {id : string, slot_type: string}) => ({
+    const inserts = drivers.map((d: { id: string, slot_type: string, team_name: string }) => ({
       race_id: race.id,
       team_id: team.id,
       team_driver_id: d.id,
       slot_type: d.slot_type,
+      driver_team_name: d.team_name
     }))
 
     const { error } = await supabase.from('lineups').insert(inserts)
@@ -85,27 +88,32 @@ export default function LineupManager({
       </h1>
 
       <div className="space-y-3">
-        {drivers.map((driver: { id: string; drivers: { first_name: string; last_name: string; car_number: string;}, slot_type: string }) => (
+        {drivers.map((driver: { id: string; drivers: { first_name: string; last_name: string; car_number: string; team_name: string; id: string }, slot_type: string }) => (
           <div
             key={driver.id}
             className="border p-4 rounded flex justify-between items-center bg-white"
           >
             <div>
               <p className="font-semibold">
-                {driver.drivers.first_name} {driver.drivers.last_name}
+                <button
+                  key={driver.id}
+                  onClick={() => { setSelectedDriver(driver.drivers.id); setSelectedDriverName(driver.drivers.first_name + ' ' + driver.drivers.last_name) }}
+                  className="text-blue-600 hover:underline"
+                >
+                  {driver.drivers.first_name} {driver.drivers.last_name}
+                </button>
               </p>
               <p className="text-sm text-gray-500">
-                #{driver.drivers.car_number}
+                #{driver.drivers.car_number} | {driver.drivers.team_name}
               </p>
             </div>
 
             <button
               onClick={() => toggleActive(driver.id)}
-              className={`px-3 py-1 rounded ${
-                driver.slot_type === 'active'
+              className={`px-3 py-1 rounded ${driver.slot_type === 'active'
                   ? 'bg-green-600 text-white'
                   : 'bg-gray-200'
-              }`}
+                }`}
             >
               {driver.slot_type === 'active'
                 ? 'Active'
@@ -115,17 +123,25 @@ export default function LineupManager({
         ))}
       </div>
 
-          <button
-              onClick={saveLineup}
-              disabled={isLocked}
-              className={`px-4 py-2 rounded ${isLocked
-                      ? 'bg-gray-400 text-white cursor-not-allowed'
-                      : 'bg-black text-white'
-                  }`}
-          >
-              {isLocked ? 'Lineup Locked' : 'Save Lineup'}
-          </button>
-
+      <button
+        onClick={saveLineup}
+        disabled={isLocked}
+        className={`px-4 py-2 rounded ${isLocked
+          ? 'bg-gray-400 text-white cursor-not-allowed'
+          : 'bg-black text-white'
+          }`}
+      >
+        {isLocked ? 'Lineup Locked' : 'Save Lineup'}
+      </button>
+      {selectedDriver && (
+        <DriverHistoryModal
+          driverId={selectedDriver}
+          seasonId={'9dbd3292-01a9-4aa2-8027-bb6e0a38679d'}
+          driverName={selectedDriverName}
+          open={!!selectedDriver}
+          onClose={() => setSelectedDriver(null)}
+        />
+      )}
     </div>
   )
 }
