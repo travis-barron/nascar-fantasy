@@ -68,8 +68,7 @@ export default function LineupManager({
       race_id: race.id,
       team_id: team.id,
       team_driver_id: d.id,
-      slot_type: d.slot_type,
-      driver_team_name: d.team_name
+      slot_type: d.slot_type
     }))
 
     const { error } = await supabase.from('lineups').insert(inserts)
