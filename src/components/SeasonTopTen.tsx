@@ -73,6 +73,9 @@ export default async function SeasonTopTen() {
             </h2>
 
             <div className="bg-white border rounded overflow-hidden">
+                <div className="bg-gray-100 p-3 font-semibold">
+                    Cumulative Season Points
+                </div>
                 <table className="w-full text-left">
                     <thead>
                         <tr className="border-b">
