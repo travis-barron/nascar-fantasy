@@ -28,7 +28,7 @@ export default function UpcomingSchedule() {
         const fetchData = async () => {
             try {
                 const response = await fetch(
-                    "https://cf.nascar.com/cacher/2026/race_list_basic.json"
+                    `https://cf.nascar.com/cacher/${year}/race_list_basic.json`
                 )
 
                 const data: RaceListResponse = await response.json()

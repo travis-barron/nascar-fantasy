@@ -5,6 +5,7 @@ import LocalTime from '@/components/LocalTime'
 import SeasonTopTen from '@/components/SeasonTopTen'
 import UpcomingRace from '@/components/UpcomingRace'
 import UpcomingSchedule from '@/components/UpcomingSchedule'
+import LiveLeaderboard from '@/components/dashboard/LiveLeaderboard'
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -52,7 +53,7 @@ export default async function DashboardPage() {
       .order('race_points', { ascending: false })
       .limit(10)
 
-    topFinishers = results ?? []
+    topFinishers = results?.sort((a, b) => (b.race_points + b.stage_1_points + b.stage_2_points) - (a.race_points + a.stage_1_points + a.stage_2_points)) ?? []
   }
 
   return (

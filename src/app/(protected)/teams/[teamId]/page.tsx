@@ -256,17 +256,17 @@ export default async function TeamDetailPage({
 
         <div className="border rounded bg-white">
           <div className="grid grid-cols-3 p-4 bg-gray-100 text-sm font-semibold uppercase tracking-wide text-gray-600">
-            <div>Race Name</div>
+            <div>Race</div>
             <div>Points Earned</div>
             <div>Rank</div>
           </div>
-          {raceHistory?.map((race, idx) => (
+          {raceHistory?.sort((a, b) => a.race_number - b.race_number).map((race, idx) => (
             <div
               key={idx}
               className={`grid grid-cols-3 p-4 ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'
                 }`}
             >
-              <div>{race.race_name}</div>
+              <div>{race.race_number}. {race.race_name}</div>
               <div>{race.total_points}</div>
               <div>{race.rank} {race.rank == 1 ? <span className="text-yellow-500 text-lg">🏆</span> : ''}</div>
             </div>
@@ -288,7 +288,7 @@ export default async function TeamDetailPage({
             <div>Total</div>
           </div>
 
-          {driverPerformance.map((d, idx) => (
+          {driverPerformance.sort((a, b) => (b.race_points + b.stage_1_points + b.stage_2_points) - (a.race_points + a.stage_1_points + a.stage_2_points)).map((d, idx) => (
             <div
               key={idx}
               className={`grid grid-cols-5 p-4 text-sm ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
