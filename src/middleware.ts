@@ -33,7 +33,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||   // Next.js internals (image optimizer!)
     pathname.startsWith("/api") ||
     pathname === "/favicon.ico" ||
-    pathname.match(/\.(png|jpg|jpeg|gif|svg|webp)$/)
+    pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|avif)$/)
   ) {
     return NextResponse.next()
   }
