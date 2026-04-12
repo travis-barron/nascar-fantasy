@@ -39,24 +39,28 @@ export default function LoginPage() {
     }
   }
 
-  const handleForgotPassword = async () => {
-    if (cooldown) return
-
-    setCooldown(true)
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    })
-
-    if (error) {
-      console.error(error.message)
-    }
-
-    // Always show success message (security best practice)
-    alert("If that email exists, a reset link has been sent.")
-
-    setTimeout(() => setCooldown(false), 60000) // 60s cooldown
+const handleForgotPassword = async () => {
+  if (!email.trim()) {
+    alert("Please enter your email address first.")
+    return
   }
+
+  if (cooldown) return
+
+  setCooldown(true)
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/update-password`,
+  })
+
+  if (error) {
+    console.error(error.message)
+  }
+
+  alert("If that email exists, a reset link has been sent.")
+
+  setTimeout(() => setCooldown(false), 60000)
+}
 
   return (
     <div className="flex min-h-screen items-center justify-center">
