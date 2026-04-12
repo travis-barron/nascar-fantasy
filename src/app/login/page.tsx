@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { createSupabaseBrowserClient  } from '@/lib/supabase-browser'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [cooldown, setCooldown] = useState(false)
   const router = useRouter()
   const supabase = createSupabaseBrowserClient()
 
@@ -37,6 +38,25 @@ export default function LoginPage() {
     }
   }
 
+  const handleForgotPassword = async () => {
+    if (cooldown) return
+
+    setCooldown(true)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    })
+
+    if (error) {
+      console.error(error.message)
+    }
+
+    // Always show success message (security best practice)
+    alert("If that email exists, a reset link has been sent.")
+
+    setTimeout(() => setCooldown(false), 60000) // 60s cooldown
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="space-y-4">
@@ -57,6 +77,9 @@ export default function LoginPage() {
           </button>
           <button onClick={handleSignup} className="border px-4 py-2">
             Sign Up
+          </button>
+          <button onClick={handleForgotPassword} className="border px-4 py-2">
+            Forgot Password?
           </button>
         </div>
       </div>
