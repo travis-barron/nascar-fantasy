@@ -2,6 +2,7 @@
 
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function UpdatePasswordPage() {
     const supabase = createSupabaseBrowserClient()
@@ -46,6 +47,12 @@ export default function UpdatePasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="space-y-4">
+        <Image src="/logo.png"
+                alt="travisbarron.studio"
+                className="mx-auto"
+                width={430}
+                height={131}
+                />
         <input
           type="password"
           className="border p-2"
