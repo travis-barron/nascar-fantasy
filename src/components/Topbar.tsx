@@ -22,9 +22,9 @@ export default function TopBar() {
 
   return (
     <>
-      <div className="flex items-center justify-between px-4 py-3 border-b bg-white text-gray-600">
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-black text-gray-600">
         <div className="font-bold">
-          NASCAR Fantasy
+          <Image src="/raceday_fantasy_horizontal.png" alt="raceday_fantasy" width={200} height={21} className="bg-black"></Image>
         </div>
 
         <button
@@ -49,8 +49,8 @@ export default function TopBar() {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-center p-0 bg-black">
-                    <Image src="/logo.png" alt="logo" width={200} height={21} className="bg-black"></Image>
-                  </div>
+            <Image src="/raceday_fantasy_horizontal.png" alt="raceday_fantasy" width={200} height={21} className="bg-black"></Image>
+          </div>
           <button
             className="text-xl mb-4"
             onClick={() => setOpen(false)}

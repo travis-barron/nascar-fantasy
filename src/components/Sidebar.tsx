@@ -22,13 +22,10 @@ export default function Sidebar() {
     <>
       <div className="w-64 bg-white border-r min-h-screen fixed space-y-3 text-gray-600">
         <div className="text-center p-6 bg-black">
-          <Image src="/logo.png" alt="logo" width={200} height={21} className="bg-black"></Image>
+          {/* <Image src="/logo.png" alt="logo" width={200} height={21} className="bg-black"></Image> */}
+          <Image src="/raceday_fantasy_horizontal.png" alt="raceday_fantasy" width={200} height={21} className="bg-black"></Image>
         </div>
         <div className="px-6 space-y-6">
-          <div className="text-xl font-bold">
-            NASCAR Fantasy
-          </div>
-
           <nav className="flex flex-col gap-4">
             <Link href="/">Dashboard</Link>
             <Link href="/standings">Standings</Link>

@@ -65,7 +65,7 @@ const handleForgotPassword = async () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="space-y-4">
-        <Image src="/logo.png"
+        <Image src="/logo_sub.png"
         alt="travisbarron.studio"
         className="mx-auto"
         width={430}
