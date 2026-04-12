@@ -5,6 +5,11 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const res = NextResponse.next()
 
+  /****************
+   * ONLY ENABLE THIS FOR MAINTENANCE
+  *****************/
+  const MAINTENANCE_MODE = true
+
   const isPublicRoute = pathname === '/login'
 
   const supabase = createServerClient(
@@ -34,7 +39,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api") ||
     pathname === "/favicon.ico" ||
     pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|avif)$/) ||
-    pathname.startsWith("/update-password")
+    pathname.startsWith("/update-password") ||
+    pathname.startsWith("/maintenance")
   ) {
     return NextResponse.next()
   }
@@ -47,6 +53,10 @@ export async function middleware(req: NextRequest) {
   // 🔁 Logged in but trying to access login page
   if (session && isPublicRoute) {
     return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  if (MAINTENANCE_MODE) {
+    return NextResponse.redirect(new URL('/maintenance', req.url))
   }
 
   return res
