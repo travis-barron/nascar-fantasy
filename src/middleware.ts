@@ -28,6 +28,16 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+    // ✅ Allow public files and Next internals
+  if (
+    pathname.startsWith("/_next") ||   // Next.js internals (image optimizer!)
+    pathname.startsWith("/api") ||
+    pathname === "/favicon.ico" ||
+    pathname.match(/\.(png|jpg|jpeg|gif|svg|webp)$/)
+  ) {
+    return NextResponse.next()
+  }
+
   // 🚫 Not logged in and trying to access protected route
   if (!session && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', req.url))

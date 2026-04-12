@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -60,6 +61,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="space-y-4">
+        <Image src="/logo.png"
+        alt="travisbarron.studio"
+        className="mx-auto"
+        width={430}
+        height={131}
+        />
         <input
           className="border p-2"
           placeholder="Email"

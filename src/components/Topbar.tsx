@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
+import Image from 'next/image'
 
 export default function TopBar() {
   const [open, setOpen] = useState(false)
@@ -47,6 +48,9 @@ export default function TopBar() {
           }`}
           onClick={(e) => e.stopPropagation()}
         >
+          <div className="text-center p-0 bg-black">
+                    <Image src="/logo.png" alt="logo" width={200} height={21} className="bg-black"></Image>
+                  </div>
           <button
             className="text-xl mb-4"
             onClick={() => setOpen(false)}
