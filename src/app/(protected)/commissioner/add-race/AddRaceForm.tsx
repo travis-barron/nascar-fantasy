@@ -11,6 +11,7 @@ export default function AddRaceForm() {
   const [name, setName] = useState('')
   const [trackName, setTrackName] = useState('')
   const [raceNumber, setRaceNumber] = useState<number>(1)
+  const [nascar_race_id, setNascarRaceId] = useState('')
   const [raceDate, setRaceDate] = useState('')
   const [lineupLockTime, setLineupLockTime] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,6 +41,7 @@ export default function AddRaceForm() {
       name,
       track_name: trackName,
       race_number: raceNumber,
+      nascar_race_id: nascar_race_id,
       race_date: raceDate,
       lineup_lock_time: isoLockTime,
       season_id: season.id,
@@ -88,6 +90,15 @@ export default function AddRaceForm() {
           placeholder="Race Number"
           value={raceNumber}
           onChange={(e) => setRaceNumber(Number(e.target.value))}
+          required
+          className="w-full border rounded p-2"
+        />
+
+        <input 
+          type="text"
+          placeholder="NASCAR Race ID"
+          value={nascar_race_id}
+          onChange={((e) => setNascarRaceId(e.target.value))}
           required
           className="w-full border rounded p-2"
         />

@@ -26,8 +26,6 @@ export default async function ResultsPage() {
     .from('races')
     .select('*')
     .order('race_date', { ascending: false })
-    .limit(1)
-    .single()
 
   if (!race) return <div>No race found.</div>
 
@@ -36,16 +34,10 @@ export default async function ResultsPage() {
     .select('*')
     .order('last_name')
 
-  const { data: existingResults } = await supabase
-    .from('race_results')
-    .select('*')
-    .eq('race_id', race.id)
-
   return (
     <ResultsEntry
-      race={race}
+      races={race || []}
       drivers={drivers || []}
-      existingResults={existingResults || []}
     />
   )
 }
