@@ -96,7 +96,7 @@ export default async function StandingsPage() {
                 </Link>
                 <br/>({row.owner_name})
               </div>
-              <div>{row.total_points}</div>
+              <div>{row.total_points} {row.weekly_rank == 1 ? "" : <span className="text-red-600">({(row.total_points - standings[0].total_points).toString()})</span>}</div>
               <div>{row.waiver_priority}</div>
             </div>
           ))}
