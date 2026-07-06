@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 import { finalizeRace } from '@/app/actions/finalizeRace'
-import { fetchRaceResults } from '@/lib/nascar/fetchRaceResults'
+import { fetchRaceResults, Lap } from '@/lib/nascar/fetchRaceResults'
 
 type NascarResult = {
     nascar_driver_id: number
@@ -11,6 +11,7 @@ type NascarResult = {
     running_pos?: number
     stage_1_points?: number
     stage_2_points?: number
+    laps: Lap[]
 }
 
 type Result = {
@@ -25,7 +26,8 @@ type Result = {
 
 export default function ResultsEntry({
     races,
-    drivers
+    drivers, 
+    race_stages
 }: any) {
     const supabase = createSupabaseBrowserClient()
 
@@ -84,7 +86,7 @@ export default function ResultsEntry({
 
             const data = await fetchRaceResults(year, raceId)
 
-            console.log(data);
+            //console.log(data);
 
             // 🔥 Build a lookup map from NASCAR data
             const lookup = new Map<string, NascarResult>(
@@ -94,16 +96,32 @@ export default function ResultsEntry({
                 ])
             )
 
+            console.log(lookup);
+
             // 🔥 Build full updated results in ONE pass
             const updatedResults = results.map((r: any) => {
                 const match = lookup.get(r.nascar_driver_id?.toString())
 
                 if (!match) return r
 
+                const stage_1_lap = (match.laps[race_stages[0].ending_lap])
+                let stage1Points = 0
+                if (stage_1_lap) {
+                    stage1Points = calculateStagePoints(stage_1_lap.RunningPos)
+                }
+
+                const stage_2_lap = (match.laps[race_stages[1].ending_lap])
+                let stage2Points = 0
+                if (stage_2_lap) {
+                    stage2Points = calculateStagePoints(stage_2_lap.RunningPos)
+                }
+
                 return {
                     ...r,
                     finish_position: Number(match.running_pos),
                     race_points: calculateRacePoints(Number(match.running_pos)),
+                    stage_1_points: stage1Points,
+                    stage_2_points: stage2Points
                 }
             })
 
@@ -125,6 +143,23 @@ export default function ResultsEntry({
         ]
 
         return table[position - 1] ?? Math.max(1, 40 - position)
+    }
+
+    const calculateStagePoints = (position: number) => {
+        const table = [
+            10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+        ]
+
+        if (position < 11)
+        {
+            return table[position - 1]
+        } else {
+            return 0
+        }
+    }
+
+    const getStageFinish = (lapdata: Lap[], lapnumber: number) => {
+        return lapdata[lapnumber].RunningPos;
     }
 
     const saveResults = async () => {

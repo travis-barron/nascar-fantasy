@@ -34,10 +34,16 @@ export default async function ResultsPage() {
     .select('*')
     .order('last_name')
 
+  const { data: race_stages } = await supabase
+    .from('race_stages')
+    .select('*')
+    .eq('race_id', race[0].id)
+
   return (
     <ResultsEntry
       races={race || []}
       drivers={drivers || []}
+      race_stages={race_stages || []}
     />
   )
 }

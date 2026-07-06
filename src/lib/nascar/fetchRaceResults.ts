@@ -11,10 +11,11 @@ export async function fetchRaceResults(year: number, raceId: string) {
 
   const data = await res.json();
 
-  const parsedData = data.laps.map((l: { FullName: string; RunningPos: Number, NASCARDriverID: Number}) => ({
+  const parsedData = data.laps.map((l: { FullName: string; RunningPos: Number, NASCARDriverID: Number, Laps: Lap[]}) => ({
     full_name: normalizeDriverName(l.FullName),
     running_pos: l.RunningPos,
-    nascar_driver_id: l.NASCARDriverID
+    nascar_driver_id: l.NASCARDriverID, 
+    laps: l.Laps
   }))
 
   return parsedData;
@@ -27,4 +28,11 @@ function normalizeDriverName(name: string): string {
     .replace(/\s*[#*]+\s*$/, "")       // remove trailing #
     .replace(/\s+/g, " ")          // normalize spaces
     .trim();
+}
+
+export interface Lap {
+  LapNumber: number,
+  LapTime: number,
+  LapSpeed: number, 
+  RunningPos: number
 }
